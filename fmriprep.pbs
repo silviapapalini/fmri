@@ -1,0 +1,14 @@
+#!/bin/bash -l
+#PBS -l walltime=8:00:00
+#PBS -l nodes=1:ppn=36
+#PBS -A default_project
+cd $PBS_O_WORKDIR
+
+singularity run --bind $PWD:/licenses,$PWD/fasting_mri:/data,$PWD/derivatives:/out,$VSC_SCRATCH:/work \
+		fmriprep-20.2.3.simg /data /out participant \
+			-w /work \
+			--participant-label FG33R RG61R RG62R RG63R RG64R\
+			--nprocs 36 --omp-nthreads 8 \
+			--fs-license-file /licenses/fs-license.txt --fs-no-reconall \
+			--fd-spike-threshold 0.9 --dvars-spike-threshold 2 \
+			--use-aroma
