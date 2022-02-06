@@ -1,7 +1,8 @@
 smooth_output=$(mktemp -u --suffix=.nii)
 mean_output=$(mktemp -u --suffix=.nii)
 
-for subj in `cat participants.tsv | tr -d '\r'` ; do
+#for subj in `cat participants.tsv | tr -d '\r'` ; do
+for subj in sub-RG61R; do
 	if [ -d "derivatives/fmriprep/$subj/func" ]; then
 	  echo "generating for $subj"
 	  mkdir -p "derivatives/afni/${subj}"
@@ -20,4 +21,5 @@ for subj in `cat participants.tsv | tr -d '\r'` ; do
 	  done
 	fi
 done
+
 

@@ -1,0 +1,17 @@
+# "calculate" roi from atlas
+3dcalc -a \
+  ~/abin/MNI_Glasser_HCP_v1.0.nii.gz'<L_Area_Frontal_Opercular>' \
+  -expr a \
+  -prefix left_front_operc2
+
+# resample anat_roi to same resolution as master
+3dresample -master rall_vr+orig \
+  -prefix anat_roi_resam \
+  -inset anat_roi+orig \
+  -rmode NN
+  
+# average data using mask
+3dmaskave -quiet -mask midACC_rs+tlrc Congruent_betas+tlrc
+
+# extract data and append as sub-brick
+3dbucket -aglueto Congruent_betas+tlrc.HEAD ${subj}/${subj}.results/stats.${subj}+tlrc'[1]'
