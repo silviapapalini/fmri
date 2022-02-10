@@ -1,7 +1,7 @@
 # "calculate" roi from atlas
 3dcalc -a \
   ~/abin/MNI_Glasser_HCP_v1.0.nii.gz'<L_Area_Frontal_Opercular>' \
-  -expr a \
+  -expr 'step(a)' \
   -prefix left_front_operc2
 
 # resample anat_roi to same resolution as master
