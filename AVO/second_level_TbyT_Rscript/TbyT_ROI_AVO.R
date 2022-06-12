@@ -26,10 +26,12 @@ read.subject.roi <- function(subjroi) {
    Y %>% tidyr::pivot_longer(tidyr::everything()) %>%
    	 tidyr::extract(name, 
    	 	"([[:alpha:]_]+).?([[0-9]+)?_([[:alpha:]]+)", 
-   	 	into=c("event_type", "trial_number", "type"), 
+   	 	into=c("cs", "trial_number", "type"), 
    	 	convert=T) %>%
- 	 dplyr::filter(!is.na(trial_number)) %>%
- 	 dplyr::mutate(SUBJ_ID=sub("^sub-", "", subj), roi=roi, phase="AVO") %>%
+ 	 dplyr::filter(!is.na(trial_number), cs %in% c("csav", "csm")) %>%
+ 	 dplyr::mutate(
+ 	 	cs=factor(cs, levels=c("csav", "csm"), labels=c("CSav", "CSM")),
+ 	 	SUBJ_ID=sub("^sub-", "", subj), roi=roi, phase="AVO") %>%
  	 tidyr::pivot_wider(names_from="type")
 }
 

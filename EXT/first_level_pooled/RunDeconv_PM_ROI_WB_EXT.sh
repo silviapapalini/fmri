@@ -14,29 +14,6 @@ subjects="sub-FG01 sub-FG02 sub-FG03 sub-FG04 sub-FG05 sub-FG06 sub-FG07 sub-FG0
 task="Extinction"
 ROIs="VTA NAcc VmPFC"
 
-# resample anat_roi to same resolution as master (your functional images [that you can check it via MANGO, open the func AND ROI, ctrl+I--> image dimension: are they the same??])
-input=derivatives/afni/sub-FG01/Extinction/sub-FG01_task-Extinction_space-MNI152NLin2009cAsym_desc-preproc_bold_smooth_scaled.nii.gz 
-if [ ! -e "derivatives/ROIs/VTA_resam.nii" ]; then
-	3dresample -master $input \
-	  -prefix "derivatives/ROIs/VTA_resam.nii" \
-	  -inset "derivatives/ROIs/VTA_bram.nii.gz" \
-	  -rmode NN
-fi
-
-if [ ! -e "derivatives/ROIs/NAcc_resam.nii" ]; then
-3dresample -master $input \
-  -prefix "derivatives/ROIs/NAcc_resam.nii" \
-  -inset "derivatives/ROIs/NAcc_HarvardOxford.nii.gz" \
-  -rmode NN
-fi
-
-if [ ! -e "derivatives/ROIs/VmPFC_resam.nii" ]; then  
-3dresample -master $input \
-  -prefix "derivatives/ROIs/VmPFC_resam.nii" \
-  -inset "derivatives/ROIs/VmPFC_parcels.nii.gz" \
-  -rmode NN
-fi
-
 for subj in $subjects; do
 	prefix="derivatives/afni/$subj/${task}"
 	result_WB_prefix="derivatives/afni/$subj/${task}/FL_results_WB_parametric_modulation"
@@ -87,6 +64,31 @@ write.table(X, file=args[2], row.names=F, col.names=F, sep=" ")
 		3dresample -master $input \
 		  -prefix $mask \
 		  -inset $input_mask \
+		  -rmode NN
+	fi
+
+	# Create ROIs for subject
+	if [ ! -e "$prefix/VTA_resam.nii" ]; then
+	# resample anat_roi to same resolution as master (your functional images [that you can check it via MANGO, open the func AND ROI, ctrl+I--> image dimension: are they the same??])
+		3dresample -master $input \
+		  -prefix "$prefix/VTA_resam.nii" \
+		  -inset "derivatives/ROIs/VTA_bram.nii.gz" \
+		  -rmode NN
+	fi
+
+	if [ ! -e "$prefix/NAcc_resam.nii" ]; then
+	# resample anat_roi to same resolution as master (your functional images [that you can check it via MANGO, open the func AND ROI, ctrl+I--> image dimension: are they the same??])
+		3dresample -master $input \
+		  -prefix "$prefix/NAcc_resam.nii" \
+		  -inset "derivatives/ROIs/NAcc_HarvardOxford.nii.gz" \
+		  -rmode NN
+	fi
+
+	if [ ! -e "$prefix/VmPFC_resam.nii" ]; then
+	# resample anat_roi to same resolution as master (your functional images [that you can check it via MANGO, open the func AND ROI, ctrl+I--> image dimension: are they the same??])
+		3dresample -master $input \
+		  -prefix "$prefix/VmPFC_resam.nii" \
+		  -inset "derivatives/ROIs/VmPFC_parcels.nii.gz" \
 		  -rmode NN
 	fi
 
@@ -144,7 +146,7 @@ write.table(X, file=args[2], row.names=F, col.names=F, sep=" ")
 	[ -e 3dREMLfit.err ] && mv 3dREMLfit.err "$result_WB_prefix/3dREMLfit.err"
 
 	for roi in $ROIs; do
-		roi_mask="derivatives/ROIs/${roi}_resam.nii"
+		roi_mask="${prefix}/${roi}_resam.nii"
 		averaged_BOLD_from_ROI="$result_ROI_prefix/averaged_BOLD_from_${roi}.1D"
 	
 	        [ -e "$result_ROI_prefix/betas_ROI_${roi}_REML.1D" -a $recompute == "true" ] && rm "$result_ROI_prefix/betas_ROI_${roi}_REML.1D" "$result_ROI_prefix/betas_ROI_${roi}_REMLvar.1D"

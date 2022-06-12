@@ -29,4 +29,4 @@ read.subject.roi <- function(subjroi) {
 
 X <- do.call(rbind, apply(expand.grid(subjects, ROIs), 1, FUN=read.subject.roi))
 X <- X %>% tidyr::pivot_wider(names_from="roi", values_from=c("Coef", "Tstat"))
-write.table(X, file="derivatives/afni/SL/SL_TbyT_ROI_EXT.csv", sep=",", row.names=FALSE)
+write.table(X, file="derivatives/afni/SL/EXT/SL_TbyT_ROI_EXT.csv", sep=",", row.names=FALSE)
