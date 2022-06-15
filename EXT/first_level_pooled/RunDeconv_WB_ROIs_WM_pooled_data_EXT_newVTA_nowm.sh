@@ -11,14 +11,15 @@ subjects="sub-FG01 sub-FG02 sub-FG03 sub-FG04 sub-FG05 sub-FG06 sub-FG07 sub-FG0
 
 
 ROIs="VTA NAcc VmPFC"
-
 task="Extinction"
-# resample anat_roi to same resolution as master (your functional images [that you can check it via MANGO, open the func AND ROI, ctrl+I--> image dimension: are they the same??])
 
+wm_inv_mask=derivatives/ROIs/WM_inv_mask.nii.gz
+
+intermediate_tmp=$(mktemp -u --suffix=.nii)
 for subj in $subjects; do
 	prefix="derivatives/afni/$subj/${task}"
 	result_WB_prefix="derivatives/afni/$subj/${task}/FL_results_WB_pooled"
-	result_ROI_prefix="derivatives/afni/$subj/${task}/FL_results_ROI_pooled"
+	result_ROI_prefix="derivatives/afni/$subj/${task}/FL_results_ROI_WM_pooled"
 	input="$prefix/${subj}_task-${task}_space-MNI152NLin2009cAsym_desc-preproc_bold_smooth_scaled.nii.gz"
 	input_mask="derivatives/afni/${subj}/gm_mask.nii.gz"
 	mask="$prefix/gm_mask_resam.nii.gz"
@@ -68,29 +69,47 @@ write.table(X, file=args[2], row.names=F, col.names=F, sep=" ")
 		  -rmode NN
 	fi
 
+	# resample WM_inv
+	if [ ! -e "$prefix/WM_inv_resam.nii" ]; then
+		3dresample -master $input \
+		  -prefix $intermediate_tmp \
+		  -prefix "$prefix/WM_inv_resam.nii" \
+		  -inset $wm_inv_mask \
+		  -rmode NN
+	fi
+
 # Create ROIs for subject
 	if [ ! -e "$prefix/VTA_resam.nii" ]; then
 	# resample anat_roi to same resolution as master (your functional images [that you can check it via MANGO, open the func AND ROI, ctrl+I--> image dimension: are they the same??])
 		3dresample -master $input \
-		  -prefix "$prefix/VTA_resam.nii" \
+		  -prefix $intermediate_tmp \
 		  -inset "derivatives/ROIs/VTA_bram.nii.gz" \
 		  -rmode NN
+
+		3dmask_tool -input "$prefix/WM_inv_resam.nii" $intermediate_tmp -prefix "$prefix/VTA_resam.nii" -inter
+		rm $intermediate_tmp
 	fi
 
 	if [ ! -e "$prefix/NAcc_resam.nii" ]; then
 	# resample anat_roi to same resolution as master (your functional images [that you can check it via MANGO, open the func AND ROI, ctrl+I--> image dimension: are they the same??])
 		3dresample -master $input \
-		  -prefix "$prefix/NAcc_resam.nii" \
+		  -prefix $intermediate_tmp \
 		  -inset "derivatives/ROIs/NAcc_HarvardOxford.nii.gz" \
 		  -rmode NN
+
+		3dmask_tool -input "$prefix/WM_inv_resam.nii" $intermediate_tmp -prefix "$prefix/NAcc_resam.nii" -inter
+		rm $intermediate_tmp
 	fi
 
 	if [ ! -e "$prefix/VmPFC_resam.nii" ]; then
 	# resample anat_roi to same resolution as master (your functional images [that you can check it via MANGO, open the func AND ROI, ctrl+I--> image dimension: are they the same??])
 		3dresample -master $input \
-		  -prefix "$prefix/VmPFC_resam.nii" \
+		  -prefix $intermediate_tmp \
 		  -inset "derivatives/ROIs/VmPFC_parcels.nii.gz" \
 		  -rmode NN
+
+		3dmask_tool -input "$prefix/WM_inv_resam.nii" $intermediate_tmp -prefix "$prefix/VmPFC_resam.nii" -inter
+		rm $intermediate_tmp
 	fi
 
 	# create highpass regressors (180s)

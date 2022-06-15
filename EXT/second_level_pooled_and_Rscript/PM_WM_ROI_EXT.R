@@ -26,7 +26,7 @@ read.subject.roi <- function(subjroi) {
    coefs <- subjects_coefs[subj]
    roi <- subjroi[[2]]
    tryCatch({
-	   filename <- paste0("derivatives/afni/",subj,"/Extinction/FL_results_ROI_parametric_modulation/betas_ROI_",roi,"_REML.1D")
+	   filename <- paste0("derivatives/afni/",subj,"/Extinction/FL_results_ROI_WM_parametric_modulation/betas_ROI_",roi,"_REML.1D")
 	   coef_names <- switch(coefs + 1, names0, names1, names2, names3)
 	   names <- c("Full_Fstat", coef_names, final_names)
 	   Y <- read.table(filename, col.names=names)
@@ -43,4 +43,4 @@ read.subject.roi <- function(subjroi) {
 
 X <- do.call(rbind, apply(expand.grid(names(subjects_coefs), ROIs), 1, FUN=read.subject.roi))
 X <- X %>% tidyr::pivot_wider(names_from="roi", values_from=c("Coef", "Tstat"))
-write.table(X, file="derivatives/afni/SL/EXT/SL_PM_ROI_EXT.csv", sep=",", row.names=FALSE)
+write.table(X, file="derivatives/afni/SL/EXT/SL_PM_WM_ROI_EXT.csv", sep=",", row.names=FALSE)
