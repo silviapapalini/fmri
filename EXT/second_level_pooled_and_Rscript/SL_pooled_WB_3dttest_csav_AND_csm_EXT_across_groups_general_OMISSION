@@ -1,0 +1,120 @@
+#!/bin/tcsh -xef
+
+# created by uber_ttest.py: version 2.1 (May 11, 2020)
+# creation date: Fri Feb 11 10:02:02 2022
+
+# ---------------------- set process variables ----------------------
+
+set dirA = derivatives/afni
+set dirP = derivatives/fmriprep
+
+# specify and possibly create results directory
+set results_dir = $dirA/SL/EXT
+if ( ! -d $results_dir ) mkdir $results_dir
+
+#set mask_dset = $dirA/SL/mean_gm_mask_resample.nii.gz
+#if ( ! -e $mask_dset ) 3dresample -master $dirP/sub-FG01/func/sub-FG01_task-Extinction_space-MNI152NLin20011cAsym_desc-brain_mask.nii.gz -prefix $mask_dset -inset $dirA/SL/mean_gm_mask.nii.gz -rmode NN
+set mask_dset = $results_dir/mask_union_task-Extinction.nii.gz
+if ( ! -e $mask_dset ) 3dmask_tool -input $dirP/sub-*/func/sub-*_task-Extinction_space-MNI152NLin20011cAsym_desc-brain_mask.nii.gz -prefix $mask_dset -union
+
+
+if ( -e $results_dir/SL_pooled_WB_3dttest_csav_AND_csm_EXT_across_groups_general_OMISSION+tlrc.BRIK ) rm $results_dir/SL_pooled_WB_3dttest_csav_AND_csm_EXT_across_groups_general_OMISSION+tlrc.*
+# ------------------------- process the data -------------------------
+
+3dttest++ -Clustsim -prefix $results_dir/SL_pooled_WB_3dttest_csav_AND_csm_EXT_across_groups_general_OMISSION                      \
+          -mask $mask_dset \
+          -setA csavANDcsm                                                       \
+             01                                                             \
+          "$dirA/sub-FG01/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]"  \
+             02                                                             \
+          "$dirA/sub-FG02/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]"  \
+             03                                                             \
+          "$dirA/sub-FG03/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]"  \
+             04                                                             \
+          "$dirA/sub-FG04/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]"  \
+             05                                                             \
+          "$dirA/sub-FG05/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]"  \
+             06                                                             \
+          "$dirA/sub-FG06/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]"  \
+             07                                                             \
+          "$dirA/sub-FG07/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]"  \
+             09                                                             \
+          "$dirA/sub-FG09/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]"  \
+             10                                                             \
+          "$dirA/sub-FG10/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]"  \
+             11                                                             \
+          "$dirA/sub-FG11/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]"  \
+             12                                                             \
+          "$dirA/sub-FG12/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]"  \
+             14                                                             \
+          "$dirA/sub-FG14/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]"  \
+             16                                                             \
+          "$dirA/sub-FG16/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]"  \
+             17                                                             \
+          "$dirA/sub-FG17/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]"  \
+             20                                                             \
+          "$dirA/sub-FG20/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]"  \
+             22                                                             \
+          "$dirA/sub-FG22/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]"  \
+             23                                                             \
+          "$dirA/sub-FG23/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]"  \
+             25                                                             \
+          "$dirA/sub-FG25/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]"  \
+             28R                                                            \
+          "$dirA/sub-FG28R/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]" \
+             29R                                                            \
+          "$dirA/sub-FG29R/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]" \
+             30R                                                            \
+          "$dirA/sub-FG30R/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]" \
+             31R                                                            \
+          "$dirA/sub-FG31R/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]" \
+             32R                                                            \
+          "$dirA/sub-FG32R/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]" \
+             33R                                                            \
+          "$dirA/sub-FG33R/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]" \
+             26                                                             \
+          "$dirA/sub-RG26/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]" \
+             27                                                             \
+          "$dirA/sub-RG27/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]"  \
+             30                                                             \
+          "$dirA/sub-RG30/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]"  \
+             31                                                             \
+          "$dirA/sub-RG31/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]"  \
+             34                                                             \
+          "$dirA/sub-RG34/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]"  \
+             37                                                             \
+          "$dirA/sub-RG37/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]"  \
+             38                                                             \
+          "$dirA/sub-RG38/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]"  \
+             41                                                             \
+          "$dirA/sub-RG41/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]"  \
+             44                                                             \
+          "$dirA/sub-RG44/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]"  \
+             47                                                             \
+          "$dirA/sub-RG47/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]"  \
+             48                                                             \
+          "$dirA/sub-RG48/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]"  \
+             49                                                             \
+          "$dirA/sub-RG49/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]"  \
+             50                                                             \
+          "$dirA/sub-RG50/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]"  \
+             51                                                             \
+          "$dirA/sub-RG51/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]"  \
+             55R                                                            \
+          "$dirA/sub-RG55R/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]" \
+             56R                                                            \
+          "$dirA/sub-RG56R/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]" \
+             58R                                                            \
+          "$dirA/sub-RG58R/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]" \
+             59R                                                            \
+          "$dirA/sub-RG59R/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]" \
+             61R                                                            \
+          "$dirA/sub-RG61R/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]" \
+             62R                                                            \
+          "$dirA/sub-RG62R/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]" \
+             63R                                                            \
+          "$dirA/sub-RG63R/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]" \
+             64R                                                            \
+          "$dirA/sub-RG64R/Extinction/FL_results_WB_pooled/betas_REML+tlrc[13]" 
+          
+             

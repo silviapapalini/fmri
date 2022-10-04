@@ -9,7 +9,7 @@ set dirA = /home/thaber/FASTING_MRI_BIDS/derivatives/afni
 set dirP = /home/thaber/FASTING_MRI_BIDS/derivatives/fmriprep
 
 # specify and possibly create results directory
-set results_dir = $dirA/SL
+set results_dir = $dirA/SL/EXT
 if ( ! -d $results_dir ) mkdir $results_dir
 
 set mask_dset = $results_dir/mask_union_task-Extinction.nii.gz

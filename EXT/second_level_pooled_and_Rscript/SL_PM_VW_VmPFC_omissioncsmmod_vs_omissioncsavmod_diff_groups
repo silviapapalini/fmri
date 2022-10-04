@@ -1,0 +1,106 @@
+#!/bin/tcsh -xef
+
+# created by uber_ttest.py: version 2.1 (May 11, 2020)
+# creation date: Thu Apr 14 07:10:10 2022
+
+# ---------------------- set process variables ----------------------
+
+set dirA = /home/thaber/FASTING_MRI_BIDS/derivatives/afni
+set dirP = /home/thaber/FASTING_MRI_BIDS/derivatives/fmriprep
+
+# specify and possibly create results directory
+set results_dir = $dirA/SL/EXT
+if ( ! -d $results_dir ) mkdir $results_dir
+
+set mask_dset = $dirA/VmPFC_resam.nii
+
+if ( -e $results_dir/SL_PM_VW_VmPFC_ttest_omissioncsmmod_vs_omissioncsavmod_diff_groups ) rm $results_dir/SL_PM_VW_VmPFC_ttest_omissioncsmmod_vs_omissioncsavmod_diff_groups
+
+# ------------------------- process the data -------------------------
+
+3dttest++ -prefix $results_dir/SL_PM_VW_VmPFC_ttest_omissioncsmmod_vs_omissioncsavmod_diff_groups -AminusB         \
+          -mask $mask_dset \
+          -setA FG \
+             01 \
+          "$dirA/sub-FG01/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             02 \
+          "$dirA/sub-FG02/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             03                                                                               \
+          "$dirA/sub-FG03/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             04                                                                               \
+          "$dirA/sub-FG04/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             06                                                                               \
+          "$dirA/sub-FG06/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             09                                                                               \
+          "$dirA/sub-FG09/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             10                                                                               \
+          "$dirA/sub-FG10/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             11                                                                               \
+          "$dirA/sub-FG11/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             12                                                                               \
+          "$dirA/sub-FG12/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             14                                                                               \
+          "$dirA/sub-FG14/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             16                                                                               \
+          "$dirA/sub-FG16/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             17                                                                               \
+          "$dirA/sub-FG17/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             20                                                                               \
+          "$dirA/sub-FG20/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             22                                                                               \
+          "$dirA/sub-FG22/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             23                                                                               \
+          "$dirA/sub-FG23/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             25                                                                               \
+          "$dirA/sub-FG25/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             28R                                                                              \
+          "$dirA/sub-FG28R/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             29R                                                                              \
+          "$dirA/sub-FG29R/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             30R                                                                              \
+          "$dirA/sub-FG30R/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             31R                                                                              \
+          "$dirA/sub-FG31R/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             32R                                                                               \
+          "$dirA/sub-FG32R/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             33R                                                                               \
+          "$dirA/sub-FG33R/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+          -setB RG                                                                            \
+             26   \
+          "$dirA/sub-RG26/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             27                                                                               \
+          "$dirA/sub-RG27/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             31                                                                               \
+          "$dirA/sub-RG31/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             34                                                                               \
+          "$dirA/sub-RG34/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             37                                                                               \
+          "$dirA/sub-RG37/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             38                                                                               \
+          "$dirA/sub-RG38/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             41                                                                               \
+          "$dirA/sub-RG41/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             44                                                                               \
+          "$dirA/sub-RG44/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             47                                                                               \
+          "$dirA/sub-RG47/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             48                                                                               \
+          "$dirA/sub-RG48/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             49                                                                               \
+          "$dirA/sub-RG49/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             50                                                                               \
+          "$dirA/sub-RG50/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             51                                                                               \
+          "$dirA/sub-RG51/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             56R                                                                               \
+          "$dirA/sub-RG56R/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             58R                                                                               \
+          "$dirA/sub-RG58R/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             59R                                                                               \
+          "$dirA/sub-RG59R/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             61R                                                                               \
+          "$dirA/sub-RG61R/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             63R                                                                               \
+          "$dirA/sub-RG63R/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"\
+             64R                                                                              \
+          "$dirA/sub-RG64R/Extinction/FL_results_VW_VmPFC_parametric_modulation/betas_REML+tlrc.[23]"

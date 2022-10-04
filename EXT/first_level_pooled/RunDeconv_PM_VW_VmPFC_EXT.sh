@@ -100,6 +100,8 @@ write.table(X, file=args[2], row.names=F, col.names=F, sep=" ")
             -glt_label 4 "csmnonM - csavnonM" \
 	    -gltsym 'SYM: csm_modulated[1] -csav_modulated[1]'  \
             -glt_label 5 "csm_modulated - csav_modulated" \
+            -gltsym 'SYM: csm_modulated[1] +csav_modulated[1]'  \
+            -glt_label 6 "csm_modulated AND csav_modulated" \
 	    -jobs 8 \
 	    -allzero_OK \
 	    -x1D $result_VW_VmPFC_prefix/X.xmat.1D \

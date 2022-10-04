@@ -1,5 +1,5 @@
 # READ ME
-# This script allows only to calculate the beta values for each condition and trial from the merged rois (csm csav for the VTA, Nacc, vmPFC, right and left unified). 
+# This script allows only to calculate the beta values for each condition and trial from each ROI (csm csav for the VTA, Nacc, vmPFC, right and left unified). 
 # Since the event files are splitted there is not real info in the output matrix about the order of presentation of the events. This means that before to run the LMM you will need to provide the real order of presentation of each CS as it was in the task/learning phase.
 # One time the script is run, you will open AFNI, read the directory and load the betas from the underlay option.
 
@@ -12,45 +12,22 @@ subjects="sub-FG01 sub-FG02 sub-FG03 sub-FG04 sub-FG05 sub-FG06 sub-FG07 sub-FG0
 
 # select/deselect the learning phase of interest. PAV, AVO, EXT
 task="Extinction"
+ROIs="VTA NAcc VmPFC"
 
-# resample anat_roi to same resolution as master (your functional images [that you can check it via MANGO, open the func AND ROI, ctrl+I--> image dimension: are they the same??])
-input=derivatives/afni/sub-FG01/Extinction/sub-FG01_task-Extinction_space-MNI152NLin2009cAsym_desc-preproc_bold_smooth_scaled.nii.gz 
-if [ ! -e "derivatives/ROIs/VTA_resam.nii" ]; then
-	3dresample -master $input \
-	  -prefix "derivatives/ROIs/VTA_resam.nii" \
-	  -inset "derivatives/ROIs/VTA_bram.nii.gz" \
-	  -rmode NN
-fi
+wm_inv_mask=derivatives/ROIs/WM_inv_mask.nii.gz
 
-if [ ! -e "derivatives/ROIs/NAcc_resam.nii" ]; then
-3dresample -master $input \
-  -prefix "derivatives/ROIs/NAcc_resam.nii" \
-  -inset "derivatives/ROIs/NAcc_HarvardOxford.nii.gz" \
-  -rmode NN
-fi
-
-if [ ! -e "derivatives/ROIs/VmPFC_resam.nii" ]; then  
-3dresample -master $input \
-  -prefix "derivatives/ROIs/VmPFC_resam.nii" \
-  -inset "derivatives/ROIs/VmPFC_parcels.nii.gz" \
-  -rmode NN
-fi
-
-if [ ! -e "derivatives/afni/mergedROIs_resam.nii" ]; then  
-3dmask_tool \
-  -input "derivatives/ROIs/VmPFC_resam.nii" "derivatives/ROIs/NAcc_resam.nii" "derivatives/ROIs/VTA_resam.nii" \
-  -prefix "derivatives/afni/mergedROIs_resam.nii" -union
-fi
-
+intermediate_tmp=$(mktemp -u --suffix=.nii)
 for subj in $subjects; do
 	prefix="derivatives/afni/$subj/${task}"
-	result_VW_mergedROIs_prefix="derivatives/afni/$subj/${task}/FL_results_VW_mergedROIs_parametric_modulation"
+	result_WB_prefix="derivatives/afni/$subj/${task}/FL_results_WB_parametric_modulation"
+	result_ROI_prefix="derivatives/afni/$subj/${task}/FL_results_ROI_WM_parametric_modulation"
 	input="$prefix/${subj}_task-${task}_space-MNI152NLin2009cAsym_desc-preproc_bold_smooth_scaled.nii.gz"
-	mask="derivatives/afni/mergedROIs_resam.nii"
+	input_mask="derivatives/afni/${subj}/gm_vta_mask.nii.gz"
+	mask="$prefix/gm_vta_mask_resam.nii.gz"
 	all_confounds="derivatives/fmriprep/${subj}/func/${subj}_task-${task}_desc-confounds_timeseries.tsv"
 	event_file="$subj/func/${subj}_task-${task}_events.tsv"
 	
-	mkdir -p $result_VW_mergedROIs_prefix
+	mkdir -p $result_WB_prefix $result_ROI_prefix 
 
 # Creates the events files (not pooled as it is for fmriprep)	
 Rscript -e '
@@ -85,6 +62,54 @@ X <- lapply(X[S], function(x) { x[is.na(x)] <- mean(x, na.rm = TRUE); x })
 write.table(X, file=args[2], row.names=F, col.names=F, sep=" ")
 ' $all_confounds $prefix/confounds
 
+	# resample the individual gm mask
+	if [ ! -e $mask ]; then  
+		3dresample -master $input \
+		  -prefix $mask \
+		  -inset $input_mask \
+		  -rmode NN
+	fi
+
+	# resample WM_inv
+	if [ ! -e "$prefix/WM_inv_resam.nii" ]; then
+		3dresample -master $input \
+		  -prefix "$prefix/WM_inv_resam.nii" \
+		  -inset $wm_inv_mask \
+		  -rmode NN
+	fi
+
+	# Create ROIs for subject
+	if [ ! -e "$prefix/VTA_resam.nii" ]; then
+	# resample anat_roi to same resolution as master (your functional images [that you can check it via MANGO, open the func AND ROI, ctrl+I--> image dimension: are they the same??])
+		3dresample -master $input \
+		  -prefix $intermediate_tmp \
+		  -inset "derivatives/ROIs/VTA_bram.nii.gz" \
+		  -rmode NN
+		mv $intermediate_tmp "$prefix/VTA_resam.nii" # originql VTA from Esser (VTA plus SN)
+	fi
+
+	if [ ! -e "$prefix/NAcc_resam.nii" ]; then
+	# resample anat_roi to same resolution as master (your functional images [that you can check it via MANGO, open the func AND ROI, ctrl+I--> image dimension: are they the same??])
+		3dresample -master $input \
+		  -prefix $intermediate_tmp \
+		  -inset "derivatives/ROIs/NAcc_HarvardOxford.nii.gz" \
+		  -rmode NN
+
+		3dmask_tool -input "$prefix/WM_inv_resam.nii" $intermediate_tmp -prefix "$prefix/NAcc_resam.nii" -inter
+		rm $intermediate_tmp
+	fi
+
+	if [ ! -e "$prefix/VmPFC_resam.nii" ]; then
+	# resample anat_roi to same resolution as master (your functional images [that you can check it via MANGO, open the func AND ROI, ctrl+I--> image dimension: are they the same??])
+		3dresample -master $input \
+		  -prefix $intermediate_tmp \
+		  -inset "derivatives/ROIs/VmPFC_parcels.nii.gz" \
+		  -rmode NN
+
+		3dmask_tool -input "$prefix/WM_inv_resam.nii" $intermediate_tmp -prefix "$prefix/VmPFC_resam.nii" -inter
+		rm $intermediate_tmp
+	fi
+
 	# create highpass regressors (180s)
 	1dBport -input $input -band 0 0.005 -nozero > "$prefix/highpass.1D"
 
@@ -114,34 +139,52 @@ write.table(X, file=args[2], row.names=F, col.names=F, sep=" ")
 	    -glt_label 2 "csmnonM - csmM" \
             -gltsym 'SYM: csav_modulated[0] +csm_modulated[0] -csav_modulated[1] -csm_modulated[1]' \
             -glt_label 3 "csavnonM AND csmnonM - csavM AND csmM"\
-            -gltsym 'SYM: csm_modulated[0] -csav_modulated[0]' \
-            -glt_label 4 "csmnonM - csavnonM" \
+            -gltsym 'SYM: csav_modulated[0] -csm_modulated[0]' \
+            -glt_label 4 "csavnonM - csmnonM" \
 	    -gltsym 'SYM: csm_modulated[1] -csav_modulated[1]'  \
             -glt_label 5 "csm_modulated - csav_modulated" \
-            -gltsym 'SYM: csm_modulated[1] +csav_modulated[1]'  \
-            -glt_label 6 "csm_modulated AND csav_modulated" \
             -gltsym 'SYM: csav_modulated[1] -csm_modulated[1]'  \
-            -glt_label 7 "csav_modulated - csm_modulated" \
+            -glt_label 6 "csav_modulated - csm_modulated" \
+            -gltsym 'SYM: csav_modulated[1] +csm_modulated[1]'  \
+            -glt_label 7 "csav_modulated AND csm_modulated" \
 	    -jobs 8 \
 	    -allzero_OK \
-	    -x1D $result_VW_mergedROIs_prefix/X.xmat.1D \
-	    -xjpeg $result_VW_mergedROIs_prefix/X.jpg \
-	    -bucket $result_VW_mergedROIs_prefix/betas_ROI \
-	    -cbucket $result_VW_mergedROIs_prefix/decon_WB \
+	    -x1D $result_WB_prefix/X.xmat.1D \
+	    -xjpeg $result_WB_prefix/X.jpg \
+	    -bucket $result_WB_prefix/betas_ROI \
+	    -cbucket $result_WB_prefix/decon_WB \
 	    -tout \
 	    -x1D_stop
 
-	[ -e $result_VW_mergedROIs_prefix/betas_REML+tlrc.HEAD -a $recompute == "true" ] && rm "$result_VW_mergedROIs_prefix"/betas_REML*
-	if [ ! -e $result_VW_mergedROIs_prefix/betas_REML+tlrc.HEAD ]; then
-		3dREMLfit -matrix $result_VW_mergedROIs_prefix/X.xmat.1D \
+	[ -e $result_WB_prefix/betas_REML+tlrc.BRIK -a $recompute == "true" ] && rm "$result_WB_prefix"/betas_REML*
+	if [ ! -e $result_WB_prefix/betas_REML+tlrc.BRIK ]; then
+		3dREMLfit -matrix $result_WB_prefix/X.xmat.1D \
 		     -input $input -mask $mask \
 		     -GOFORIT \
-		     -Rbuck "$result_VW_mergedROIs_prefix/betas_REML" \
-		     -Rvar "$result_VW_mergedROIs_prefix/betas_REMLvar" \
+		     -Rbuck "$result_WB_prefix/betas_REML" \
+		     -Rvar "$result_WB_prefix/betas_REMLvar" \
 		     -Grid 3 -tout
 	fi
 
-	[ -e 3dDeconvolve.err ] && mv 3dDeconvolve.err "$result_VW_mergedROIs_prefix/3dDeconvolve.err"
-	[ -e 3dREMLfit.err ] && mv 3dREMLfit.err "$result_VW_mergedROIs_prefix/3dREMLfit.err"
+	[ -e 3dDeconvolve.err ] && mv 3dDeconvolve.err "$result_WB_prefix/3dDeconvolve.err"
+	[ -e 3dREMLfit.err ] && mv 3dREMLfit.err "$result_WB_prefix/3dREMLfit.err"
+
+	for roi in $ROIs; do
+		roi_mask="${prefix}/${roi}_resam.nii"
+		averaged_BOLD_from_ROI="$result_ROI_prefix/averaged_BOLD_from_${roi}.1D"
+	
+	        [ -e "$result_ROI_prefix/betas_ROI_${roi}_REML.1D" -a $recompute == "true" ] && rm "$result_ROI_prefix/betas_ROI_${roi}_REML.1D" "$result_ROI_prefix/betas_ROI_${roi}_REMLvar.1D"
+		if [ ! -e "$result_ROI_prefix/betas_ROI_${roi}_REML.1D" ]; then
+			# average voxel signal to get the mean betas using ROIs before using the events
+			3dmaskave -quiet -mask $roi_mask $input > $averaged_BOLD_from_ROI
+
+			3dREMLfit -matrix $result_WB_prefix/X.xmat.1D \
+			     -input ${averaged_BOLD_from_ROI}'[0]'\' \
+			     -GOFORIT \
+			     -Rbuck "$result_ROI_prefix/betas_ROI_${roi}_REML" \
+			     -Rvar "$result_ROI_prefix/betas_ROI_${roi}_REMLvar" \
+			     -Grid 3 -tout
+		fi
+	done
 done
 

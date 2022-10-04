@@ -1,0 +1,227 @@
+#!/bin/tcsh -xef
+
+# created by uber_ttest.py: version 2.1 (May 11, 2020)
+# creation date: Fri Feb 11 10:02:02 2022
+
+# ---------------------- set process variables ----------------------
+
+set dirA = derivatives/afni
+set dirP = derivatives/fmriprep
+
+# specify and possibly create results directory
+set results_dir = $dirA/SL/AVO
+if ( ! -d $results_dir ) mkdir $results_dir
+
+set mask_dset = $dirA/SL/mean_gm_mask_resample.nii.gz
+if ( ! -e $mask_dset ) 3dresample -master $dirP/sub-FG01/func/sub-FG01_task-Avoidance_space-MNI152NLin20011cAsym_desc-brain_mask.nii.gz -prefix $mask_dset -inset $dirA/SL/mean_gm_mask.nii.gz -rmode NN
+#set mask_dset = $results_dir/mask_union_task-Avoidance.nii.gz
+#if ( ! -e $mask_dset ) 3dmask_tool -input $dirP/sub-*/func/sub-*_task-Avoidance_space-MNI152NLin20011cAsym_desc-brain_mask.nii.gz -prefix $mask_dset -union
+
+
+if ( -e $results_dir/SL_pooled_WB_3dttest_csav_vs_csm_AVO_across_groups_first_OMISSION+tlrc.BRIK ) rm $results_dir/SL_pooled_WB_3dttest_csav_vs_csm_AVO_across_groups_first_OMISSION+tlrc.*
+# ------------------------- process the data -------------------------
+
+3dttest++ -ClustSim -prefix $results_dir/SL_pooled_WB_3dttest_csav_vs_csm_AVO_across_groups_first_OMISSION -AminusB                         \
+          -mask $mask_dset\
+          -setA first_csav                                                       \
+             01                                                             \
+          "$dirA/sub-FG01/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]"  \
+             02                                                             \
+          "$dirA/sub-FG02/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]"  \
+             03                                                             \
+          "$dirA/sub-FG03/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]"  \
+             04                                                             \
+          "$dirA/sub-FG04/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]"  \
+             05                                                             \
+          "$dirA/sub-FG05/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]"  \
+             06                                                             \
+          "$dirA/sub-FG06/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]"  \
+             07                                                             \
+          "$dirA/sub-FG07/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]"  \
+             09                                                             \
+          "$dirA/sub-FG09/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]"  \
+             10                                                             \
+          "$dirA/sub-FG10/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]"  \
+             11                                                             \
+          "$dirA/sub-FG11/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]"  \
+             12                                                             \
+          "$dirA/sub-FG12/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]"  \
+             14                                                             \
+          "$dirA/sub-FG14/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]"  \
+             15                                                             \
+          "$dirA/sub-FG15/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]"  \
+             16                                                             \
+          "$dirA/sub-FG16/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]"  \
+             17                                                             \
+          "$dirA/sub-FG17/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]"  \
+             20                                                             \
+          "$dirA/sub-FG20/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]"  \
+             22                                                             \
+          "$dirA/sub-FG22/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]"  \
+             23                                                             \
+          "$dirA/sub-FG23/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]"  \
+             25                                                             \
+          "$dirA/sub-FG25/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]"  \
+             28R                                                            \
+          "$dirA/sub-FG28R/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]" \
+             29R                                                            \
+          "$dirA/sub-FG29R/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]" \
+             30R                                                            \
+          "$dirA/sub-FG30R/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]" \
+             31R                                                            \
+          "$dirA/sub-FG31R/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]" \
+             32R                                                            \
+          "$dirA/sub-FG32R/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]" \
+             33R                                                            \
+          "$dirA/sub-FG33R/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]" \
+             26                                                             \
+          "$dirA/sub-RG26/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]" \
+             27                                                             \
+          "$dirA/sub-RG27/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]"  \
+             30                                                             \
+          "$dirA/sub-RG30/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]"  \
+             31                                                             \
+          "$dirA/sub-RG31/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]"  \
+             32                                                             \
+          "$dirA/sub-RG32/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]"  \
+             33                                                             \
+          "$dirA/sub-RG33/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]"  \
+             34                                                             \
+          "$dirA/sub-RG34/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]"  \
+             35                                                             \
+          "$dirA/sub-RG35/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]"  \
+             37                                                             \
+          "$dirA/sub-RG37/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]"  \
+             38                                                             \
+          "$dirA/sub-RG38/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]"  \
+             41                                                             \
+          "$dirA/sub-RG41/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]"  \
+             44                                                             \
+          "$dirA/sub-RG44/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]"  \
+             47                                                             \
+          "$dirA/sub-RG47/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]"  \
+             48                                                             \
+          "$dirA/sub-RG48/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]"  \
+             49                                                             \
+          "$dirA/sub-RG49/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]"  \
+             50                                                             \
+          "$dirA/sub-RG50/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]"  \
+             51                                                             \
+          "$dirA/sub-RG51/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]"  \
+             55R                                                            \
+          "$dirA/sub-RG55R/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]" \
+             56R                                                            \
+          "$dirA/sub-RG56R/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]" \
+             58R                                                            \
+          "$dirA/sub-RG58R/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]" \
+             59R                                                            \
+          "$dirA/sub-RG59R/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]" \
+             61R                                                            \
+          "$dirA/sub-RG61R/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]" \
+             62R                                                            \
+          "$dirA/sub-RG62R/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]" \
+             63R                                                            \
+          "$dirA/sub-RG63R/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]" \
+             64R                                                            \
+          "$dirA/sub-RG64R/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[25]" \
+          -setB first_csm                                                       \
+             01                                                             \
+          "$dirA/sub-FG01/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]"  \
+             02                                                             \
+          "$dirA/sub-FG02/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]"  \
+             03                                                             \
+          "$dirA/sub-FG03/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]"  \
+             04                                                             \
+          "$dirA/sub-FG04/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]"  \
+             05                                                             \
+          "$dirA/sub-FG05/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]"  \
+             06                                                             \
+          "$dirA/sub-FG06/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]"  \
+             07                                                             \
+          "$dirA/sub-FG07/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]"  \
+             09                                                             \
+          "$dirA/sub-FG09/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]"  \
+             10                                                             \
+          "$dirA/sub-FG10/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]"  \
+             11                                                             \
+          "$dirA/sub-FG11/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]"  \
+             12                                                             \
+          "$dirA/sub-FG12/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]"  \
+             14                                                             \
+          "$dirA/sub-FG14/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]"  \
+             15                                                             \
+          "$dirA/sub-FG15/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]"  \
+             16                                                             \
+          "$dirA/sub-FG16/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]"  \
+             17                                                             \
+          "$dirA/sub-FG17/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]"  \
+             20                                                             \
+          "$dirA/sub-FG20/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]"  \
+             22                                                             \
+          "$dirA/sub-FG22/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]"  \
+             23                                                             \
+          "$dirA/sub-FG23/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]"  \
+             25                                                             \
+          "$dirA/sub-FG25/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]"  \
+             28R                                                            \
+          "$dirA/sub-FG28R/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]" \
+             29R                                                            \
+          "$dirA/sub-FG29R/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]" \
+             30R                                                            \
+          "$dirA/sub-FG30R/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]" \
+             31R                                                            \
+          "$dirA/sub-FG31R/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]" \
+             32R                                                            \
+          "$dirA/sub-FG32R/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]" \
+             33R                                                            \
+          "$dirA/sub-FG33R/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]" \
+             26                                                             \
+          "$dirA/sub-RG26/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]"  \
+             27                                                             \
+          "$dirA/sub-RG27/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]"  \
+             30                                                             \
+          "$dirA/sub-RG30/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]"  \
+             31                                                             \
+          "$dirA/sub-RG31/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]"  \
+             32                                                             \
+          "$dirA/sub-RG32/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]"  \
+             33                                                             \
+          "$dirA/sub-RG33/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]"  \
+             34                                                             \
+          "$dirA/sub-RG34/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]"  \
+             35                                                             \
+          "$dirA/sub-RG35/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]"  \
+             37                                                             \
+          "$dirA/sub-RG37/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]"  \
+             38                                                             \
+          "$dirA/sub-RG38/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]"  \
+             41                                                             \
+          "$dirA/sub-RG41/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]"  \
+             44                                                             \
+          "$dirA/sub-RG44/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]"  \
+             47                                                             \
+          "$dirA/sub-RG47/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]"  \
+             48                                                             \
+          "$dirA/sub-RG48/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]"  \
+             49                                                             \
+          "$dirA/sub-RG49/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]"  \
+             50                                                             \
+          "$dirA/sub-RG50/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]"  \
+             51                                                             \
+          "$dirA/sub-RG51/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]"  \
+             55R                                                            \
+          "$dirA/sub-RG55R/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]" \
+             56R                                                            \
+          "$dirA/sub-RG56R/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]" \
+             58R                                                            \
+          "$dirA/sub-RG58R/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]" \
+             59R                                                            \
+          "$dirA/sub-RG59R/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]" \
+             61R                                                            \
+          "$dirA/sub-RG61R/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]" \
+             62R                                                            \
+          "$dirA/sub-RG62R/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]" \
+             63R                                                            \
+          "$dirA/sub-RG63R/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]" \
+             64R                                                            \
+          "$dirA/sub-RG64R/Avoidance/FL_results_WB_non_pooled/betas_REML+tlrc[1]" 

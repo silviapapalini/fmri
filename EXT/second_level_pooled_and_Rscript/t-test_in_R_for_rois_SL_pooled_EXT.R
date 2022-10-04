@@ -1,7 +1,7 @@
 library(ggplot2)
 library(dplyr)
 
-setwd("~/FASTING_MRI_BIDS/derivatives/afni/SL/")
+setwd("~/FASTING_MRI_BIDS/derivatives/afni/SL/EXT/")
 X <- read.csv("SL_pooled_roi_EXT.csv", header=T) %>%
   tidyr::extract(SUBJ_ID, c("GROUP", "ID"), "([A-Z]+)([0-9]+R?)") %>%
   tidyr::pivot_longer(c(CSAV,CSM,CSAV_CSM,CSM_CSAV), names_to="CS") %>%
