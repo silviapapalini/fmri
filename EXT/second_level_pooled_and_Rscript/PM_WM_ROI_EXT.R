@@ -6,7 +6,8 @@ final_names <- c("relief_rating#0_Coef", "relief_rating#0_Tstat", "onset_csm#0_C
            "csmnonMcsmM#0_Coef", "csmnonMcsmM#0_Tstat",
            "csavnonMANDcsmnonMcsavMANDcsmM#0_Coef", "csavnonMANDcsmnonMcsavMANDcsmM#0_Tstat",
            "csavnonMcsmnonM#0_Coef", "csavnonMcsmnonM#0_Tstat",
-           "csmMcsavM#0_Coef", "csmMcsavM#0_Tstat")
+           "csmMcsavM#0_Coef", "csmMcsavM#0_Tstat", "csavmodulatedcsm_modulated#0_Coef","csavmodulatedcsm_modulated#0_Tstat",
+           "csav_modulatedANDcsm_modulated#0_Coef","csav_modulatedANDcsm_modulated#0_Tstat")
 
 #0=csav+csm
 #1=csav only
@@ -19,7 +20,7 @@ names2 <- c("csav#0_Coef", "csav#0_Tstat", "csm#0_Coef", "csm#0_Tstat", "csm#1_C
 names3 <- c("csav#0_Coef", "csav#0_Tstat", "csm#0_Coef", "csm#0_Tstat")
 
 subjects_coefs <- c("sub-FG01"=0, "sub-FG02"=0, "sub-FG03"=0, "sub-FG04"=0, "sub-FG05"=3, "sub-FG06"=0, "sub-FG07"=1, "sub-FG09"=0, "sub-FG10"=0, "sub-FG11"=0, "sub-FG12"=0, "sub-FG14"=0, "sub-FG16"=0, "sub-FG17"=0, "sub-FG20"=0, "sub-FG22"=0, "sub-FG23"=0, "sub-FG25"=0, "sub-FG28R"=0, "sub-FG29R"=0, "sub-FG30R"=0, "sub-FG31R"=0, "sub-FG32R"=0, "sub-FG33R"=0, "sub-RG26"=0, "sub-RG27"=0, "sub-RG30"=1, "sub-RG31"=0, "sub-RG34"=0, "sub-RG37"=0, "sub-RG38"=0, "sub-RG41"=0, "sub-RG44"=0, "sub-RG47"=0, "sub-RG48"=0, "sub-RG49"=0, "sub-RG50"=0, "sub-RG51"=0, "sub-RG55R"=1, "sub-RG56R"=0, "sub-RG58R"=0, "sub-RG59R"=0, "sub-RG61R"=0, "sub-RG62R"=1, "sub-RG63R"=0, "sub-RG64R"=0)
-ROIs <- c("NAcc", "VTA", "VmPFC")
+ROIs <- c("VTA","canlab_VTA_bilateral", "NAcc", "canlab_NAC_bilateral","VmPFC", "VmPFC_box", "VmPFC_csp_vs_csm")
 
 read.subject.roi <- function(subjroi) {
    subj <- subjroi[[1]]

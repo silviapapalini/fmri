@@ -9,7 +9,7 @@ set -e
 recompute=true
 subjects="sub-FG01 sub-FG02 sub-FG03 sub-FG04 sub-FG05 sub-FG06 sub-FG07 sub-FG09 sub-FG10 sub-FG11 sub-FG12 sub-FG14 sub-FG15 sub-FG16 sub-FG17 sub-FG20 sub-FG22 sub-FG23 sub-FG25 sub-FG28R sub-FG29R sub-FG30R sub-FG31R sub-FG32R sub-FG33R sub-RG26 sub-RG27 sub-RG30 sub-RG31 sub-RG32 sub-RG33 sub-RG34 sub-RG35 sub-RG37 sub-RG38 sub-RG41 sub-RG44 sub-RG47 sub-RG48 sub-RG49 sub-RG50 sub-RG51 sub-RG55R sub-RG56R sub-RG58R sub-RG59R sub-RG61R sub-RG62R sub-RG63R sub-RG64R"
 
-ROIs="VTA NAcc VmPFC VmPFC_box"
+ROIs="canlab_VTA_bilateral NAcc canlab_NAC_bilateral VmPFC Nacc_shell Nacc_core caudate"
 
 task="Avoidance"
 
@@ -88,59 +88,8 @@ write.table(X, file=args[2], row.names=F, col.names=F, sep=" ")
 		  -rmode NN
 	fi
 
-	# resample WM_inv
-	if [ ! -e "$prefix/WM_inv_resam.nii" ]; then
-		3dresample -master $input \
-		  -prefix $intermediate_tmp \
-		  -prefix "$prefix/WM_inv_resam.nii" \
-		  -inset $wm_inv_mask \
-		  -rmode NN
-	fi
-
-# Create ROIs for subject
-	if [ ! -e "$prefix/VTA_resam.nii" ]; then
-	# resample anat_roi to same resolution as master (your functional images [that you can check it via MANGO, open the func AND ROI, ctrl+I--> image dimension: are they the same??])
-		3dresample -master $input \
-		  -prefix $intermediate_tmp \
-		  -inset "derivatives/ROIs/VTA_bram.nii.gz" \
-		  -rmode NN
-		mv $intermediate_tmp "$prefix/VTA_resam.nii" # originql VTA from Esser (VTA plus SN)
-	fi
-
-	if [ ! -e "$prefix/NAcc_resam.nii" ]; then
-	# resample anat_roi to same resolution as master (your functional images [that you can check it via MANGO, open the func AND ROI, ctrl+I--> image dimension: are they the same??])
-		3dresample -master $input \
-		  -prefix $intermediate_tmp \
-		  -inset "derivatives/ROIs/NAcc_bil.nii.gz" \
-		  -rmode NN
-
-		3dmask_tool -input "$prefix/WM_inv_resam.nii" $intermediate_tmp -prefix "$prefix/NAcc_bil.nii" -inter
-		rm $intermediate_tmp
-	fi
-
-	if [ ! -e "$prefix/VmPFC_resam.nii" ]; then
-	# resample anat_roi to same resolution as master (your functional images [that you can check it via MANGO, open the func AND ROI, ctrl+I--> image dimension: are they the same??])
-		3dresample -master $input \
-		  -prefix $intermediate_tmp \
-		  -inset "derivatives/ROIs/VmPFC_parcels.nii.gz" \
-		  -rmode NN
-
-		3dmask_tool -input "$prefix/WM_inv_resam.nii" $intermediate_tmp -prefix "$prefix/VmPFC_resam.nii" -inter
-		rm $intermediate_tmp
-		
-	fi
-		if [ ! -e "$prefix/VmPFC_box_resam.nii" ]; then
-	# resample anat_roi to same resolution as master (your functional images [that you can check it via MANGO, open the func AND ROI, ctrl+I--> image dimension: are they the same??])
-		3dresample -master $input \
-		  -prefix $intermediate_tmp \
-		  -inset "derivatives/ROIs/VmPFC_box.nii" \
-		  -rmode NN
-
-		mv $intermediate_tmp "$prefix/VmPFC_box_resam.nii"
-		fi
-
 	# create highpass regressors (180s)
-	1dBport -input $input -band 0 0.005 -nozero > "$prefix/highpass.1D"
+	1dBport -input $input -band 0 0.005555555555555556 -nozero > "$prefix/highpass.1D"
 
 	# generate X matrix
 	3dDeconvolve -input $input \
@@ -150,13 +99,13 @@ write.table(X, file=args[2], row.names=F, col.names=F, sep=" ")
 	    -local_times \
 	    -GOFORIT 3 \
 	    -num_stimts 13 \
-	    -stim_times 1 "$prefix/omission_csav_early.1D" 'BLOCK(4.5)' \
+	    -stim_times 1 "$prefix/omission_csav_early.1D" 'GAM' \
 	    -stim_label 1 csav_early \
-	    -stim_times 2 "$prefix/omission_csm_early.1D"  'BLOCK(4.5)' \
+	    -stim_times 2 "$prefix/omission_csm_early.1D"  'GAM' \
 	    -stim_label 2 csm_early \
-	    -stim_times 3 "$prefix/omission_csav_late.1D"  'BLOCK(4.5)' \
+	    -stim_times 3 "$prefix/omission_csav_late.1D"  'GAM' \
 	    -stim_label 3 csav_late \
-	    -stim_times 4 "$prefix/omission_csm_late.1D"  'BLOCK(4.5)' \
+	    -stim_times 4 "$prefix/omission_csm_late.1D"  'GAM' \
 	    -stim_label 4 csm_late \
 	    -stim_times_AM1 5 "$prefix/relief_rating.1D" 'dmBLOCK(1)' \
 	    -stim_label 5 relief_rating \
@@ -178,6 +127,7 @@ write.table(X, file=args[2], row.names=F, col.names=F, sep=" ")
 	    -stim_label 13 press \
 	    -ortvec $prefix/confounds "confounds" \
 	    -ortvec $prefix/highpass.1D highpass \
+	    -num_glt 11 \
 	    -gltsym 'SYM: csav_early -csm_early' \
 	    -glt_label 1 "csav_early vs csm_early" \
 	    -gltsym 'SYM: csav_late -csm_late' \
@@ -194,10 +144,12 @@ write.table(X, file=args[2], row.names=F, col.names=F, sep=" ")
 	    -glt_label 7 "onset_csav_late vs onset_csm_late" \
 	    -gltsym 'SYM: csav_early -csm_early -csav_late +csm_late' \
 	    -glt_label 8 "csav_early_vs_csm_early_minus_csav_late_vs_csm_late" \
+	    -gltsym 'SYM: csm_early -csav_early -csm_late +csav_late' \
+	    -glt_label 9 "csm_early_vs_csav_early_minus_csm_late_vs_csav_late" \
 	    -gltsym 'SYM: onset_csav_early -onset_csav_late -onset_csm_early +onset_csm_late' \
-	    -glt_label 9 "onset_csav_early_vs_late vs onset_csm_early_vs_onset_csm_late" \
+	    -glt_label 10 "onset_csav_early_vs_late vs onset_csm_early_vs_onset_csm_late" \
 	    -gltsym 'SYM: csav_early +csm_early - csav_late -csm_late' \
-	    -glt_label 10 "csav_early AND csm_early vs csav_late AND csm_late" \
+	    -glt_label 11 "csav_early AND csm_early vs csav_late AND csm_late" \
 	    -jobs 8 \
 	    -x1D $result_WB_prefix/X.xmat.1D \
 	    -xjpeg $result_WB_prefix/X.jpg \
@@ -205,7 +157,7 @@ write.table(X, file=args[2], row.names=F, col.names=F, sep=" ")
 	    -tout \
 	    -x1D_stop
 
-	[ -e $result_WB_prefix/betas_REML+tlrc.BRIK -a $recompute == "zzatrue" ] && rm $result_WB_prefix/betas_REML*
+	[ -e $result_WB_prefix/betas_REML+tlrc.BRIK -a $recompute == "true" ] && rm $result_WB_prefix/betas_REML*
 	if [ ! -e $result_WB_prefix/betas_REML+tlrc.BRIK ]; then
 		3dREMLfit -matrix $result_WB_prefix/X.xmat.1D \
 		     -input $input -mask $mask \
@@ -219,16 +171,15 @@ write.table(X, file=args[2], row.names=F, col.names=F, sep=" ")
 	[ -e 3dREMLfit.err ] && mv 3dREMLfit.err "$result_WB_prefix/3dREMLfit.err"
 
 	for roi in $ROIs; do
-		roi_mask="${prefix}/${roi}_resam.nii"
-		averaged_BOLD_from_ROI="$result_ROI_prefix/averaged_BOLD_from_${roi}.1D"
 
+		#averaged_BOLD_from_ROI="$result_ROI_prefix/averaged_BOLD_from_${roi}.1D"
+	        scaled_BOLD_from_ROI="$prefix/${subj}_task-${task}_scaled_BOLD_from_${roi}.1D"
 	        [ -e "$result_ROI_prefix/betas_ROI_${roi}_REML.1D" -a $recompute == "true" ] && rm "$result_ROI_prefix/betas_ROI_${roi}_REML.1D" "$result_ROI_prefix/betas_ROI_${roi}_REMLvar.1D"
 		if [ ! -e "$result_ROI_prefix/betas_ROI_${roi}_REML.1D" ]; then
-			# average voxel signal to get the mean betas using ROIs before using the events
-			3dmaskave -quiet -mask $roi_mask $input > $averaged_BOLD_from_ROI
+
 
 			3dREMLfit -matrix $result_WB_prefix/X.xmat.1D \
-			     -input ${averaged_BOLD_from_ROI}'[0]'\' \
+			     -input ${scaled_BOLD_from_ROI} \
 			     -Rbuck "$result_ROI_prefix/betas_ROI_${roi}_REML" \
 			     -Rvar "$result_ROI_prefix/betas_ROI_${roi}_REMLvar" \
 			     -GOFORIT \

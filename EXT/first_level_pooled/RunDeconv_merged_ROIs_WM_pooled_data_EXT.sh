@@ -87,7 +87,7 @@ write.table(X, file=args[2], row.names=F, col.names=F, sep=" ")
 ' $all_confounds $prefix/confounds
 
 	# create highpass regressors (180s)
-	1dBport -input $input -band 0 0.005 -nozero > "$prefix/highpass.1D"
+	1dBport -input $input -band 0 0.005555555555555556 -nozero > "$prefix/highpass.1D"
 
 	# generate X matrix
 	3dDeconvolve \

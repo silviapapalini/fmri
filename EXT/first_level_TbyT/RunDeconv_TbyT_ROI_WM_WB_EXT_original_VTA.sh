@@ -12,11 +12,8 @@ subjects="sub-FG01 sub-FG02 sub-FG03 sub-FG04 sub-FG05 sub-FG06 sub-FG07 sub-FG0
 
 # select/deselect the learning phase of interest. PAV, AVO, EXT
 task="Extinction"
-ROIs="VTA NAcc VmPFC"
+ROIs="VTA canlab_VTA_bilateral NAcc canlab_NAC_bilateral VmPFC VmPFC_box VmPFC_csp_vs_csm"
 
-wm_inv_mask=derivatives/ROIs/WM_inv_mask.nii.gz
-
-intermediate_tmp=$(mktemp -u --suffix=.nii)
 for subj in $subjects; do
 	prefix="derivatives/afni/$subj/${task}"
 	result_WB_prefix="derivatives/afni/$subj/${task}/FL_results_WB_non_pooled"
@@ -35,45 +32,6 @@ for subj in $subjects; do
 		  -rmode NN
 	fi
 
-	# resample WM_inv
-	if [ ! -e "$prefix/WM_inv_resam.nii" ]; then
-		3dresample -master $input \
-		  -prefix "$prefix/WM_inv_resam.nii" \
-		  -inset $wm_inv_mask \
-		  -rmode NN
-	fi
-
-	# Ceeate ROIs for subject
-	if [ ! -e "$prefix/VTA_resam.nii" ]; then
-	# resample anat_roi to same resolution as master (your functional images [that you can check it via MANGO, open the func AND ROI, ctrl+I--> image dimension: are they the same??])
-		3dresample -master $input \
-		  -prefix $intermediate_tmp \
-		  -inset "derivatives/ROIs/VTA_bram.nii.gz" \
-		  -rmode NN
-		mv $intermediate_tmp "$prefix/VTA_resam.nii" # originql VTA from Esser (VTA plus SN)
-	fi
-
-	if [ ! -e "$prefix/NAcc_resam.nii" ]; then
-	# resample anat_roi to same resolution as master (your functional images [that you can check it via MANGO, open the func AND ROI, ctrl+I--> image dimension: are they the same??])
-		3dresample -master $input \
-		  -prefix $intermediate_tmp \
-		  -inset "derivatives/ROIs/NAcc_HarvardOxford.nii.gz" \
-		  -rmode NN
-
-		3dmask_tool -input "$prefix/WM_inv_resam.nii" $intermediate_tmp -prefix "$prefix/NAcc_resam.nii" -inter
-		rm $intermediate_tmp
-	fi
-
-	if [ ! -e "$prefix/VmPFC_resam.nii" ]; then
-	# resample anat_roi to same resolution as master (your functional images [that you can check it via MANGO, open the func AND ROI, ctrl+I--> image dimension: are they the same??])
-		3dresample -master $input \
-		  -prefix $intermediate_tmp \
-		  -inset "derivatives/ROIs/VmPFC_parcels.nii.gz" \
-		  -rmode NN
-
-		3dmask_tool -input "$prefix/WM_inv_resam.nii" $intermediate_tmp -prefix "$prefix/VmPFC_resam.nii" -inter
-		rm $intermediate_tmp
-	fi
 	
 	mkdir -p $result_WB_prefix $result_ROI_prefix 
 
@@ -111,7 +69,7 @@ write.table(X, file=args[2], row.names=F, col.names=F, sep=" ")
 ' $all_confounds $prefix/confounds
 
 	# create highpass regressors (180s)
-	1dBport -input $input -band 0 0.005 -nozero > "$prefix/highpass.1D"
+	1dBport -input $input -band 0 0.005555555555555556 -nozero > "$prefix/highpass.1D"
 
 	# generate X matrix
 	3dDeconvolve -input $input \
@@ -154,16 +112,13 @@ write.table(X, file=args[2], row.names=F, col.names=F, sep=" ")
 	[ -e 3dREMLfit.err ] && mv 3dREMLfit.err "$result_WB_prefix/3dREMLfit.err"
 
 	for roi in $ROIs; do
-		roi_mask="${prefix}/${roi}_resam.nii"
-		averaged_BOLD_from_ROI="$result_ROI_prefix/averaged_BOLD_from_${roi}.1D"
+		#averaged_BOLD_from_ROI="$prefix/${subj}_task-${task}_averaged_BOLD_from_${roi}.1D'"
+		scaled_BOLD_from_ROI="$prefix/${subj}_task-${task}_scaled_BOLD_from_${roi}.1D"
 	
-	        [ -e "$result_ROI_prefix/betas_ROI_${roi}_REML.1D"  -a $recompute == "true" ] && rm "$result_ROI_prefix/betas_ROI_${roi}_REML.1D" "$result_ROI_prefix/betas_ROI_${roi}_REMLvar.1D"
+	        [ -e "$result_ROI_prefix/betas_ROI_${roi}_REML.1D" -a $recompute == "true" ] && rm "$result_ROI_prefix/betas_ROI_${roi}_REML.1D" "$result_ROI_prefix/betas_ROI_${roi}_REMLvar.1D"
 		if [ ! -e "$result_ROI_prefix/betas_ROI_${roi}_REML.1D" ]; then
-			# average voxel signal to get the mean betas using ROIs before using the events
-			3dmaskave -quiet -mask $roi_mask $input > $averaged_BOLD_from_ROI
-	  
 			3dREMLfit -matrix $result_WB_prefix/X.xmat.1D \
-			     -input ${averaged_BOLD_from_ROI}'[0]'\' \
+			     -input ${scaled_BOLD_from_ROI} \
 			     -GOFORIT \
 			     -Rbuck "$result_ROI_prefix/betas_ROI_${roi}_REML" \
 			     -Rvar "$result_ROI_prefix/betas_ROI_${roi}_REMLvar" \

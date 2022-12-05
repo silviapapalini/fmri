@@ -10,7 +10,7 @@ recompute=true
 subjects="sub-FG01 sub-FG02 sub-FG03 sub-FG04 sub-FG05 sub-FG06 sub-FG07 sub-FG09 sub-FG10 sub-FG11 sub-FG12 sub-FG14 sub-FG15 sub-FG16 sub-FG17 sub-FG20 sub-FG22 sub-FG23 sub-FG25 sub-FG28R sub-FG29R sub-FG30R sub-FG31R sub-FG32R sub-FG33R sub-RG26 sub-RG27 sub-RG30 sub-RG31 sub-RG32 sub-RG33 sub-RG34 sub-RG35 sub-RG37 sub-RG38 sub-RG41 sub-RG44 sub-RG47 sub-RG48 sub-RG49 sub-RG50 sub-RG51 sub-RG55R sub-RG56R sub-RG58R sub-RG59R sub-RG61R sub-RG62R sub-RG63R sub-RG64R"
 
 
-ROIs="VTA NAcc VmPFC"
+ROIs="canlab_VTA_bilateral NAcc canlab_NAC_bilateral VmPFC Nacc_shell Nacc_core"
 
 task="Avoidance"
 
@@ -95,7 +95,7 @@ write.table(X, file=args[2], row.names=F, col.names=F, sep=" ")
 
 
 	# create highpass regressors (180s)
-	1dBport -input $input -band 0 0.005 -nozero > "$prefix/highpass.1D"
+	1dBport -input $input -band 0 0.005555555555555556 -nozero > "$prefix/highpass.1D"
 
 	# generate X matrix
 	3dDeconvolve -input $input \
@@ -105,9 +105,9 @@ write.table(X, file=args[2], row.names=F, col.names=F, sep=" ")
 	    -local_times \
 	    -GOFORIT 3 \
 	    -num_stimts 8 \
-	    -stim_times 1 "$prefix/omission_csav.1D" 'BLOCK(4.5)' \
+	    -stim_times 1 "$prefix/omission_csav.1D" 'GAM' \
 	    -stim_label 1 csav \
-	    -stim_times 2 "$prefix/relief_csm.1D" 'BLOCK(4.5)' \
+	    -stim_times 2 "$prefix/relief_csm.1D" 'GAM' \
 	    -stim_label 2 csm \
 	    -stim_times_AM1 3 "$prefix/relief_rating.1D" 'dmBLOCK(1)' \
 	    -stim_label 3 relief_rating \

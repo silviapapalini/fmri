@@ -12,7 +12,7 @@ subjects="sub-FG01 sub-FG02 sub-FG03 sub-FG04 sub-FG05 sub-FG06 sub-FG07 sub-FG0
 
 # select/deselect the learning phase of interest. PAV, AVO, EXT
 task="Avoidance"
-ROIs="VTA NAcc VmPFC"
+ROIs="canlab_VTA_bilateral NAcc canlab_NAC_bilateral VmPFC Nacc_shell Nacc_core caudate"
 
 wm_inv_mask=derivatives/ROIs/WM_inv_mask.nii.gz
 
@@ -115,7 +115,7 @@ write.table(X, file=args[2], row.names=F, col.names=F, sep=" ")
 	fi
 
 	# create highpass regressors (180s)
-	1dBport -input $input -band 0 0.005 -nozero > "$prefix/highpass.1D"
+	1dBport -input $input -band 0 0.005555555555555556 -nozero > "$prefix/highpass.1D"
 
 	# generate X matrix
 	3dDeconvolve -input $input \
@@ -124,9 +124,9 @@ write.table(X, file=args[2], row.names=F, col.names=F, sep=" ")
 	    -polort 0 \
 	    -local_times \
 	    -num_stimts 8 \
-	    -stim_times_AM2 1 "$prefix/omission_csav_modulated.1D" 'BLOCK(4.5)' \
+	    -stim_times_AM2 1 "$prefix/omission_csav_modulated.1D" 'GAM' \
 	    -stim_label 1 csav_modulated \
-	    -stim_times_AM2 2 "$prefix/relief_csm_modulated.1D" 'BLOCK(4.5)' \
+	    -stim_times_AM2 2 "$prefix/relief_csm_modulated.1D" 'GAM' \
 	    -stim_label 2 csm_modulated \
 	    -stim_times_AM1 3 "$prefix/relief_rating.1D" 'dmBLOCK(1)' \
 	    -stim_label 3 relief_rating \

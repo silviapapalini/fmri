@@ -10,7 +10,7 @@ recompute=true
 subjects="sub-FG01 sub-FG02 sub-FG03 sub-FG04 sub-FG05 sub-FG06 sub-FG07 sub-FG09 sub-FG10 sub-FG11 sub-FG12 sub-FG14 sub-FG16 sub-FG17 sub-FG20 sub-FG22 sub-FG23 sub-FG25 sub-FG28R sub-FG29R sub-FG30R sub-FG31R sub-FG32R sub-FG33R sub-RG26 sub-RG27 sub-RG30 sub-RG31 sub-RG34 sub-RG37 sub-RG38 sub-RG41 sub-RG44 sub-RG47 sub-RG48 sub-RG49 sub-RG50 sub-RG51 sub-RG55R sub-RG56R sub-RG58R sub-RG59R sub-RG61R sub-RG62R sub-RG63R sub-RG64R"
 
 
-ROIs="VTA NAcc VmPFC"
+ROIs="canlab_VTA_bilateral NAcc canlab_NAC_bilateral VmPFC Nacc_shell Nacc_core"
 task="Extinction"
 
 wm_inv_mask=derivatives/ROIs/WM_inv_mask.nii.gz
@@ -69,49 +69,9 @@ write.table(X, file=args[2], row.names=F, col.names=F, sep=" ")
 		  -rmode NN
 	fi
 
-	# resample WM_inv
-	if [ ! -e "$prefix/WM_inv_resam.nii" ]; then
-		3dresample -master $input \
-		  -prefix $intermediate_tmp \
-		  -prefix "$prefix/WM_inv_resam.nii" \
-		  -inset $wm_inv_mask \
-		  -rmode NN
-	fi
-
-# Create ROIs for subject
-	if [ ! -e "$prefix/VTA_resam.nii" ]; then
-	# resample anat_roi to same resolution as master (your functional images [that you can check it via MANGO, open the func AND ROI, ctrl+I--> image dimension: are they the same??])
-		3dresample -master $input \
-		  -prefix $intermediate_tmp \
-		  -inset "derivatives/ROIs/VTA_bram.nii.gz" \
-		  -rmode NN
-		mv $intermediate_tmp "$prefix/VTA_resam.nii" # originql VTA from Esser (VTA plus SN)
-	fi
-
-	if [ ! -e "$prefix/NAcc_resam.nii" ]; then
-	# resample anat_roi to same resolution as master (your functional images [that you can check it via MANGO, open the func AND ROI, ctrl+I--> image dimension: are they the same??])
-		3dresample -master $input \
-		  -prefix $intermediate_tmp \
-		  -inset "derivatives/ROIs/NAcc_HarvardOxford.nii.gz" \
-		  -rmode NN
-
-		3dmask_tool -input "$prefix/WM_inv_resam.nii" $intermediate_tmp -prefix "$prefix/NAcc_resam.nii" -inter
-		rm $intermediate_tmp
-	fi
-
-	if [ ! -e "$prefix/VmPFC_resam.nii" ]; then
-	# resample anat_roi to same resolution as master (your functional images [that you can check it via MANGO, open the func AND ROI, ctrl+I--> image dimension: are they the same??])
-		3dresample -master $input \
-		  -prefix $intermediate_tmp \
-		  -inset "derivatives/ROIs/VmPFC_parcels.nii.gz" \
-		  -rmode NN
-
-		3dmask_tool -input "$prefix/WM_inv_resam.nii" $intermediate_tmp -prefix "$prefix/VmPFC_resam.nii" -inter
-		rm $intermediate_tmp
-	fi
 
 	# create highpass regressors (180s)
-	1dBport -input $input -band 0 0.005 -nozero > "$prefix/highpass.1D"
+	1dBport -input $input -band 0 0.005555555555555556 -nozero > "$prefix/highpass.1D"
 
 	# generate X matrix
 	3dDeconvolve \
@@ -121,9 +81,9 @@ write.table(X, file=args[2], row.names=F, col.names=F, sep=" ")
 	    -polort 0 \
 	    -local_times \
 	    -num_stimts 5 \
-	    -stim_times 1 "$prefix/relief_csav.1D" 'BLOCK(4.5)' \
+	    -stim_times 1 "$prefix/relief_csav.1D" 'GAM' \
 	    -stim_label 1 csav \
-	    -stim_times 2 "$prefix/relief_csm.1D" 'BLOCK(4.5)' \
+	    -stim_times 2 "$prefix/relief_csm.1D" 'GAM' \
 	    -stim_label 2 csm \
 	    -stim_times_AM1 3 "$prefix/relief_rating.1D" 'dmBLOCK(1)' \
 	    -stim_label 3 relief_rating \
@@ -152,7 +112,7 @@ write.table(X, file=args[2], row.names=F, col.names=F, sep=" ")
 	    -bucket $result_WB_prefix/statsWB \
 	    -x1D_stop
 
-	[ -e $result_WB_prefix/betas_REML+tlrc.BRIK -a $recompute == "true" ] && rm "$result_WB_prefix"/betas_REML*
+	[ -e $result_WB_prefix/betas_REML+tlrc.BRIK -a $recompute == "zztrue" ] && rm "$result_WB_prefix"/betas_REML*
 	if [ ! -e $result_WB_prefix/betas_REML+tlrc.BRIK ]; then
 		3dREMLfit -matrix $result_WB_prefix/X.xmat.1D \
 		     -input $input -mask $mask \
@@ -166,16 +126,14 @@ write.table(X, file=args[2], row.names=F, col.names=F, sep=" ")
 	[ -e 3dREMLfit.err ] && mv 3dREMLfit.err "$result_WB_prefix/3dREMLfit.err"
 
 	for roi in $ROIs; do
-		roi_mask="${prefix}/${roi}_resam.nii"
-		averaged_BOLD_from_ROI="$result_ROI_prefix/averaged_BOLD_from_${roi}.1D"
-	
+		#averaged_BOLD_from_ROI="$result_ROI_prefix/averaged_BOLD_from_${roi}.1D"
+	        scaled_BOLD_from_ROI="$prefix/${subj}_task-${task}_scaled_BOLD_from_${roi}.1D"
 	        [ -e "$result_ROI_prefix/betas_ROI_${roi}_REML.1D" -a $recompute == "true" ] && rm "$result_ROI_prefix/betas_ROI_${roi}_REML.1D" "$result_ROI_prefix/betas_ROI_${roi}_REMLvar.1D"
 		if [ ! -e "$result_ROI_prefix/betas_ROI_${roi}_REML.1D" ]; then
-			# average voxel signal to get the mean betas using ROIs before using the events
-			3dmaskave -quiet -mask $roi_mask $input > $averaged_BOLD_from_ROI
+
 
 			3dREMLfit -matrix $result_WB_prefix/X.xmat.1D \
-			     -input ${averaged_BOLD_from_ROI}'[0]'\' \
+			     -input ${scaled_BOLD_from_ROI} \
 			     -GOFORIT \
 			     -Rbuck "$result_ROI_prefix/betas_ROI_${roi}_REML" \
 			     -Rvar "$result_ROI_prefix/betas_ROI_${roi}_REMLvar" \
